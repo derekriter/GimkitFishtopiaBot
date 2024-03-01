@@ -11,7 +11,8 @@ bot = () => {
         "D": "d",
         "E": "e",
         "F": "f",
-        "G": "g"
+        "G": "g",
+        "H": "h"
     };
     
     class Question {
@@ -49,7 +50,21 @@ bot = () => {
         return question;
     }
     function clickAnswer(q, answerIndex) {
-        q.answerDivs[answerIndex].click();
+        const eventOrder = [
+            "touchstart",
+            "touchend",
+            "mouseover",
+            "mousemove",
+            "mousedown",
+            "mouseup",
+            "click"
+          ];
+          
+          eventOrder.forEach((e) => {
+            if(e.includes("mouse") || e == "click") {
+              q.answerDivs[answerIndex].dispatchEvent(new MouseEvent("click", {bubbles: true}));
+            }
+          });
     }
     
     let loop = setInterval(() => {
@@ -66,7 +81,7 @@ bot = () => {
         if(PAIRS.hasOwnProperty(currentQ.title)) {
             let answer = PAIRS[currentQ.title];
             
-            answerI = currentQ.answers.findIndex(answer);
+            let answerI = currentQ.answers.indexOf(answer);
             
             if(answerI === -1) console.log("Incorrect answer");
             else clickAnswer(currentQ, answerI);

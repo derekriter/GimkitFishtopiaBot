@@ -1,4 +1,9 @@
 bot = () => {
+    //add wss to content security policy
+    let csp = document.createElement("meta");
+    
+    document.head.appendChild(csp);
+    
     document.runBot = true;
     
     const Q_BOX_CLASS = "sc-gyChMU bbvGmo";
@@ -49,29 +54,40 @@ bot = () => {
         
         return question;
     }
-    function clickAnswer(q, answerIndex) {
-        const eventOrder = [
-            "touchstart",
-            "touchend",
-            "mouseover",
-            "mousemove",
-            "mousedown",
-            "mouseup",
-            "click"
-          ];
-          
-          eventOrder.forEach((e) => {
-            if(e.includes("mouse") || e == "click") {
-              q.answerDivs[answerIndex].dispatchEvent(new MouseEvent("click", {bubbles: true}));
-            }
-          });
+    function clickAnswer(answerIndex) {
+        ws.send(`CLICK${answerIndex}`);
     }
     
+    let wsOpen = false;
+    let ws = new WebSocket("ws://localhost:8001");
+    ws.onopen = (e) => {
+        console.log("Connected to server");
+        wsOpen = true;
+    };
+    ws.onmessage = (e) => {
+        console.log(e.data);
+        if(e.data === "NEXT") shouldUpdate = true;
+    };
+    ws.onerror = (e) => {
+        console.log("Failed to connect to clicker server.");
+        document.runBot = false;
+    };
+    ws.onclose = (e) => {
+        console.log("Server connection closed.");
+        document.runBot = false;
+        wsOpen = false;
+    }
+    let shouldUpdate = true;
+    
     let loop = setInterval(() => {
-        if(document.runBot !== true){
+        if(!document.runBot){
             clearInterval(loop);
+            
+            ws.close();
+            console.log("Bot stopped. To restart, run 'bot()'");
             return;
         }
+        if(!shouldUpdate || !wsOpen) return;
         
         let currentQ = getQuestion();
         let hasQ = currentQ.title !== null;
@@ -83,11 +99,13 @@ bot = () => {
             
             let answerI = currentQ.answers.indexOf(answer);
             
-            if(answerI === -1) console.log("Incorrect answer");
-            else clickAnswer(currentQ, answerI);
+            if(answerI === -1) console.log(`Incorrect answer | Q: ${currentQ.title}, Current A: ${answer}`);
+            else clickAnswer(answerI);
         }
-        else console.log("No answer");
-    }, 100);
+        else console.log(`No answer | Q: ${currentQ.title}`);
+        
+        shouldUpdate = false;
+    }, 10);
 };
 stopBot = () => {
     document.runBot = false;

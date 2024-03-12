@@ -128,10 +128,10 @@ getBotQA = () => {
     console.log("document.BOT_PAIRS = {");
     let i = 0;
     for(const [q, a] of Object.entries(document.BOT_PAIRS)) {
-        let end = i == Object.entries(document.BOT_PAIRS).length - 1 ? "" : ",";
+        let end = (i === Object.entries(document.BOT_PAIRS).length - 1) ? "" : ",";
         console.log(`    "${q}": "${a}"${end}`);
-
-        i++:
+    
+        i++;
     }
     console.log("};");
 };

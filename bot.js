@@ -1,15 +1,10 @@
-bot = () => {
-    //add wss to content security policy
-    let csp = document.createElement("meta");
-    
-    document.head.appendChild(csp);
-    
+startBot = () => {
     document.runBot = true;
     
     const Q_BOX_CLASS = "sc-gyChMU bbvGmo";
     const A_CLASS = "sc-eTWrZZ cdbqRc";
     
-    const PAIRS = {
+    document.BOT_PAIRS = {
         "A": "a",
         "B": "b",
         "C": "c",
@@ -77,7 +72,7 @@ bot = () => {
         document.runBot = false;
         wsOpen = false;
     }
-    let shouldUpdate = true;
+    document.shouldUpdateBot = true;
     
     let loop = setInterval(() => {
         if(!document.runBot){
@@ -87,16 +82,15 @@ bot = () => {
             console.log("Bot stopped. To restart, run 'bot()'");
             return;
         }
-        if(!shouldUpdate || !wsOpen) return;
+        if(!document.shouldUpdateBot || !wsOpen) return;
         
         let currentQ = getQuestion();
         let hasQ = currentQ.title !== null;
         
         if(!hasQ) return;
         
-        if(PAIRS.hasOwnProperty(currentQ.title)) {
-            let answer = PAIRS[currentQ.title];
-            
+        if(document.BOT_PAIRS.hasOwnProperty(currentQ.title)) {
+            let answer = document.BOT_PAIRS[currentQ.title];
             let answerI = currentQ.answers.indexOf(answer);
             
             if(answerI === -1) console.log(`Incorrect answer | Q: ${currentQ.title}, Current A: ${answer}`);
@@ -104,11 +98,43 @@ bot = () => {
         }
         else console.log(`No answer | Q: ${currentQ.title}`);
         
-        shouldUpdate = false;
+        document.shouldUpdateBot = false;
     }, 10);
 };
 stopBot = () => {
     document.runBot = false;
-}
+};
+addBotAnswer = (q, a) => {
+    if(document.BOT_PAIRS.hasOwnProperty(q)) {
+        console.log(`Overwriting previous answer '${document.BOT_PAIRS[q]}'`);
+    }
+    else {
+        console.log(`Adding answer '${a}'`);
+    }
 
-bot();
+    document.BOT_PAIRS[q] = a;
+};
+removeBotAnswer = (q) => {
+    if(!document.BOT_PAIRS.hasOwnProperty(q)) {
+        console.log(`No answer for Q '${q}'`);
+        return;
+    }
+    delete document.BOT_PAIRS[q];
+};
+forceBotUpdate = () => {
+    document.shouldUpdateBot = true;
+};
+getBotQA = () => {
+    console.log("document.BOT_PAIRS = {");
+    let i = 0;
+    for(const [q, a] of Object.entries(document.BOT_PAIRS)) {
+        let end = i == Object.entries(document.BOT_PAIRS).length - 1 ? "" : ",";
+        console.log(`    "${q}": "${a}"${end}`);
+
+        i++:
+    }
+    console.log("};");
+};
+
+console.log("startBot() : start bot\nstopBot() : stop bot\naddBotAnswer(q, a) : add an answer to the bot's Q/A database\nremoveBotAnswer(q, a) : remove an answer from the bot's Q/A database\nforceBotUpdate() : force the bot to run another cycle without a response from the server. Useful for restarting the bot after adding an answer\ngetBotQA() : print out a formatted list of the Q/A database. Useful for updating the hardcoded database");
+startBot();

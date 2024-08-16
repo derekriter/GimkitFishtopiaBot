@@ -4,16 +4,7 @@ startBot = () => {
     const Q_BOX_CLASS = "sc-gyChMU bbvGmo";
     const A_CLASS = "sc-eTWrZZ cdbqRc";
     
-    document.BOT_PAIRS = {
-        "A": "a",
-        "B": "b",
-        "C": "c",
-        "D": "d",
-        "E": "e",
-        "F": "f",
-        "G": "g",
-        "H": "h"
-    };
+    document.BOT_PAIRS = {};
     
     class Question {
         constructor(titleDiv) {
